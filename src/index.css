@@ -26,9 +26,9 @@
   --color-negative-bg: #f3d8da;
   --color-warn: #d4881a;
   --color-warn-bg: #f5e7c9;
-  /* Fonts */
+  /* Fonts — Mulish em todo o app, com tabular-nums para alinhamento de números */
   --font-sans: "Mulish", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-mono: "Mulish", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Mulish", Georgia, serif;
 }
 
