@@ -33,13 +33,10 @@ export async function getFaturamentoMes(
   return rows ?? [];
 }
 
-export async function getEvolucaoRede(
-  meses = 24,
-): Promise<RedeMensal[]> {
+export async function getEvolucaoRede(meses = 24): Promise<RedeMensal[]> {
   const { data, error } = await supabase
     .from("faturamento")
-    .select("data, faturamento, pedidos")
-    .order("data", { ascending: false });
+    .select("data, faturamento, pedidos");
   if (error) throw new Error(`getEvolucaoRede: ${error.message}`);
 
   const byMonth = new Map<
@@ -82,9 +79,7 @@ export async function getFaturamentoPorLoja(
     .order("data", { ascending: true });
   if (loja) q = q.eq("loja", loja);
   if (ano) {
-    q = q
-      .gte("data", `${ano}-01-01`)
-      .lte("data", `${ano}-12-01`);
+    q = q.gte("data", `${ano}-01-01`).lte("data", `${ano}-12-01`);
   }
   const { data, error } = await q;
   if (error) throw new Error(`getFaturamentoPorLoja: ${error.message}`);
@@ -92,9 +87,7 @@ export async function getFaturamentoPorLoja(
 }
 
 export async function getAnosDisponiveis(): Promise<number[]> {
-  const { data, error } = await supabase
-    .from("faturamento")
-    .select("data");
+  const { data, error } = await supabase.from("faturamento").select("data");
   if (error) throw new Error(`getAnosDisponiveis: ${error.message}`);
   const anos = new Set<number>();
   for (const r of data ?? []) {
@@ -158,7 +151,12 @@ export async function getResumoMes(data: string): Promise<{
 
 export type LojaSerie = {
   loja: string;
-  pontos: { data: string; faturamento: number; pedidos: number; ticket_medio: number }[];
+  pontos: {
+    data: string;
+    faturamento: number;
+    pedidos: number;
+    ticket_medio: number;
+  }[];
 };
 
 export async function getSeriesPorLoja(ano: number): Promise<LojaSerie[]> {
@@ -182,6 +180,169 @@ export async function getSeriesPorLoja(ano: number): Promise<LojaSerie[]> {
     map.set(r.loja, s);
   }
   return [...map.values()].sort((a, b) => a.loja.localeCompare(b.loja));
+}
+
+export type ComparativoAno = {
+  mes: number;
+  atual: number | null;
+  anterior: number | null;
+};
+
+export async function getComparativoAnual(
+  ano: number,
+): Promise<ComparativoAno[]> {
+  const { data, error } = await supabase
+    .from("faturamento")
+    .select("data, faturamento")
+    .gte("data", `${ano - 1}-01-01`)
+    .lte("data", `${ano}-12-01`);
+  if (error) throw new Error(`getComparativoAnual: ${error.message}`);
+
+  const byMonth = new Map<string, number>();
+  for (const r of data ?? []) {
+    byMonth.set(
+      r.data,
+      (byMonth.get(r.data) ?? 0) + Number(r.faturamento),
+    );
+  }
+
+  return Array.from({ length: 12 }, (_, i) => {
+    const m = i + 1;
+    const k = `${ano}-${String(m).padStart(2, "0")}-01`;
+    const kPrev = `${ano - 1}-${String(m).padStart(2, "0")}-01`;
+    return {
+      mes: m,
+      atual: byMonth.has(k) ? byMonth.get(k)! : null,
+      anterior: byMonth.has(kPrev) ? byMonth.get(kPrev)! : null,
+    };
+  });
+}
+
+export type LojaTendencia = {
+  loja: string;
+  ultimo: number;
+  anterior: number;
+  variacao_pct: number | null;
+  ultimo_data: string;
+  serie: number[];
+};
+
+export async function getTendenciasLojas(
+  meses = 12,
+): Promise<LojaTendencia[]> {
+  const ultima = await getUltimaData();
+  if (!ultima) return [];
+  const [y, m] = ultima.split("-").map(Number);
+  const inicio = new Date(y, m - meses, 1);
+  const inicioStr = `${inicio.getFullYear()}-${String(
+    inicio.getMonth() + 1,
+  ).padStart(2, "0")}-01`;
+
+  const { data, error } = await supabase
+    .from("faturamento")
+    .select("loja, data, faturamento")
+    .gte("data", inicioStr)
+    .order("data", { ascending: true });
+  if (error) throw new Error(`getTendenciasLojas: ${error.message}`);
+
+  const byLoja = new Map<string, { data: string; faturamento: number }[]>();
+  for (const r of data ?? []) {
+    const arr = byLoja.get(r.loja) ?? [];
+    arr.push({ data: r.data, faturamento: Number(r.faturamento) });
+    byLoja.set(r.loja, arr);
+  }
+
+  const result: LojaTendencia[] = [];
+  for (const [loja, pontos] of byLoja) {
+    if (pontos.length === 0) continue;
+    const ultimo = pontos[pontos.length - 1];
+    const anterior = pontos[pontos.length - 2];
+    const variacao =
+      anterior && anterior.faturamento > 0
+        ? ((ultimo.faturamento - anterior.faturamento) /
+            anterior.faturamento) *
+          100
+        : null;
+    result.push({
+      loja,
+      ultimo: ultimo.faturamento,
+      anterior: anterior?.faturamento ?? 0,
+      variacao_pct: variacao,
+      ultimo_data: ultimo.data,
+      serie: pontos.map((p) => p.faturamento),
+    });
+  }
+
+  return result.sort((a, b) => b.ultimo - a.ultimo);
+}
+
+export type ResumoYTD = {
+  ano: number;
+  faturamento: number;
+  pedidos: number;
+  ticket_medio: number;
+  meses_completos: number;
+};
+
+export async function getResumoYTD(): Promise<{
+  atual: ResumoYTD;
+  anterior: ResumoYTD;
+  yoy_percent: number | null;
+}> {
+  const ultima = await getUltimaData();
+  if (!ultima) {
+    const empty: ResumoYTD = {
+      ano: 0,
+      faturamento: 0,
+      pedidos: 0,
+      ticket_medio: 0,
+      meses_completos: 0,
+    };
+    return { atual: empty, anterior: empty, yoy_percent: null };
+  }
+  const [y, m] = ultima.split("-").map(Number);
+
+  const { data, error } = await supabase
+    .from("faturamento")
+    .select("data, faturamento, pedidos")
+    .gte("data", `${y - 1}-01-01`)
+    .lte("data", `${y}-${String(m).padStart(2, "0")}-01`);
+  if (error) throw new Error(`getResumoYTD: ${error.message}`);
+
+  let curFat = 0,
+    curPed = 0,
+    prevFat = 0,
+    prevPed = 0;
+  for (const r of data ?? []) {
+    const ano = Number(r.data.slice(0, 4));
+    const mes = Number(r.data.slice(5, 7));
+    if (ano === y && mes <= m) {
+      curFat += Number(r.faturamento);
+      curPed += Number(r.pedidos);
+    } else if (ano === y - 1 && mes <= m) {
+      prevFat += Number(r.faturamento);
+      prevPed += Number(r.pedidos);
+    }
+  }
+
+  const atual: ResumoYTD = {
+    ano: y,
+    faturamento: curFat,
+    pedidos: curPed,
+    ticket_medio: curPed > 0 ? curFat / curPed : 0,
+    meses_completos: m,
+  };
+  const anterior: ResumoYTD = {
+    ano: y - 1,
+    faturamento: prevFat,
+    pedidos: prevPed,
+    ticket_medio: prevPed > 0 ? prevFat / prevPed : 0,
+    meses_completos: m,
+  };
+  const yoy_percent =
+    prevFat > 0 ? ((curFat - prevFat) / prevFat) * 100 : null;
+
+  return { atual, anterior, yoy_percent };
 }
 
 export type LinhaResumoLoja = LojaMensal;
