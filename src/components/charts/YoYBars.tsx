@@ -68,7 +68,8 @@ export function YoYBars({
           />
           <Bar
             dataKey={`${anoAtual - 1}`}
-            fill="#ece2cf"
+            fill="#b78247"
+            fillOpacity={0.45}
             radius={[3, 3, 0, 0]}
             maxBarSize={28}
           />

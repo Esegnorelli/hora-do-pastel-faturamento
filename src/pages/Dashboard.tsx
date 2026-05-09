@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import clsx from "clsx";
 import { Loading } from "@/components/Loading";
 import { Spark } from "@/components/Spark";
@@ -21,15 +21,26 @@ import {
   fullMonthYearLabel,
   monthName,
 } from "@/lib/format";
+import type { Faturamento } from "@/lib/types";
+
+type SortKey =
+  | "loja"
+  | "faturamento"
+  | "pedidos"
+  | "ticket_medio"
+  | "mom_percent"
+  | "yoy_percent";
+type SortDir = "asc" | "desc";
 
 export function Dashboard() {
   const { data, isLoading, error } = useFaturamentoAll();
+  const [sortKey, setSortKey] = useState<SortKey>("faturamento");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const computed = useMemo(() => {
     if (!data || data.length === 0) return null;
     const rede = aggregateRedeMensal(data);
     const lastData = rede[rede.length - 1].data;
-    const prevData = rede.length >= 2 ? rede[rede.length - 2].data : null;
     const lastRede = rede[rede.length - 1];
     const prevRede = rede.length >= 2 ? rede[rede.length - 2] : null;
     const momRede =
@@ -83,10 +94,16 @@ export function Dashboard() {
       };
     });
 
+    // Most recent updated_at across all rows (when last lançamento happened)
+    let lastUpdate: string | null = null;
+    for (const r of data) {
+      const t = r.updated_at ?? r.created_at ?? null;
+      if (t && (!lastUpdate || t > lastUpdate)) lastUpdate = t;
+    }
+
     return {
       rede,
       lastData,
-      prevData,
       lastRede,
       momRede,
       yoyPercent,
@@ -98,6 +115,7 @@ export function Dashboard() {
       ytdAnterior,
       ytdYoy,
       compRows,
+      lastUpdate,
     };
   }, [data]);
 
@@ -124,21 +142,40 @@ export function Dashboard() {
     ytdAnterior,
     ytdYoy,
     compRows,
+    lastUpdate,
   } = computed;
 
   const lastMonth = monthName(Number(lastData.slice(5, 7)));
   const last36 = rede.slice(-36);
 
-  // Sort store rows by faturamento descending for the table
-  const sorted = [...lastMonthRows].sort(
-    (a, b) => Number(b.faturamento) - Number(a.faturamento),
-  );
+  const sorted = sortRows(lastMonthRows, sortKey, sortDir);
+
+  const toggleSort = (k: SortKey) => {
+    if (sortKey === k) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(k);
+      setSortDir(k === "loja" ? "asc" : "desc");
+    }
+  };
 
   return (
     <div className="space-y-14">
       {/* HERO — editorial */}
       <section>
-        <p className="eyebrow">Mês mais recente · {fullMonthYearLabel(lastData)}</p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <p className="eyebrow">
+            Mês mais recente · {fullMonthYearLabel(lastData)}
+          </p>
+          {lastUpdate && (
+            <p className="text-[11px] tabular-nums text-ink-3 font-medium">
+              <span className="eyebrow inline">última entrada</span>{" "}
+              <span className="text-ink-2 font-semibold">
+                {fmtTimestamp(lastUpdate)}
+              </span>
+            </p>
+          )}
+        </div>
         <div className="mt-3 flex flex-wrap items-end gap-x-10 gap-y-4">
           <div>
             <p className="display text-[clamp(72px,12vw,160px)]">
@@ -233,7 +270,8 @@ export function Dashboard() {
             {fmtMoney(ytdAtual)}
           </p>
           <p className="prose-rich text-sm mt-2">
-            de janeiro a {lastMonth}. No mesmo período de {ano - 1}: {fmtMoney(ytdAnterior)}.
+            de janeiro a {lastMonth}. No mesmo período de {ano - 1}:{" "}
+            {fmtMoney(ytdAnterior)}.
           </p>
         </div>
         <div>
@@ -301,13 +339,16 @@ export function Dashboard() {
         <YoYBars rows={compRows} anoAtual={ano} />
       </section>
 
-      {/* STORE TABLE — editorial dense */}
+      {/* STORE TABLE — editorial dense, sortable */}
       <section>
         <div className="flex items-baseline justify-between mb-4">
           <div>
             <p className="eyebrow">Desempenho por loja</p>
             <h2 className="font-display font-black text-2xl tracking-tight text-ink mt-1">
-              {lastMonth} de {ano}, ordenado por faturamento
+              {lastMonth} de {ano} ·{" "}
+              <span className="text-ink-3 font-bold text-base">
+                clique nas colunas para ordenar
+              </span>
             </h2>
           </div>
           <Link
@@ -322,13 +363,60 @@ export function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-ink-3 eyebrow border-b border-rule">
-                <th className="text-left font-bold py-3 pl-2">#</th>
-                <th className="text-left font-bold py-3">Loja</th>
-                <th className="text-right font-bold py-3 px-3">Faturamento</th>
-                <th className="text-right font-bold py-3 px-3">Pedidos</th>
-                <th className="text-right font-bold py-3 px-3">Ticket</th>
-                <th className="text-right font-bold py-3 px-3">MoM</th>
-                <th className="text-right font-bold py-3 px-3">YoY</th>
+                <th className="text-left font-bold py-3 pl-2 w-[40px]">#</th>
+                <SortHeader
+                  k="loja"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                >
+                  Loja
+                </SortHeader>
+                <SortHeader
+                  k="faturamento"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                  align="right"
+                >
+                  Faturamento
+                </SortHeader>
+                <SortHeader
+                  k="pedidos"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                  align="right"
+                >
+                  Pedidos
+                </SortHeader>
+                <SortHeader
+                  k="ticket_medio"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                  align="right"
+                >
+                  Ticket
+                </SortHeader>
+                <SortHeader
+                  k="mom_percent"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                  align="right"
+                >
+                  MoM
+                </SortHeader>
+                <SortHeader
+                  k="yoy_percent"
+                  cur={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                  align="right"
+                >
+                  YoY
+                </SortHeader>
                 <th className="text-right font-bold py-3 pr-2">12 meses</th>
               </tr>
             </thead>
@@ -337,6 +425,7 @@ export function Dashboard() {
                 const serie = (lojaRows.get(row.loja) ?? [])
                   .slice(-12)
                   .map((r) => Number(r.faturamento));
+                const isNew = row.yoy_percent == null;
                 return (
                   <tr
                     key={row.id}
@@ -346,12 +435,15 @@ export function Dashboard() {
                       {String(i + 1).padStart(2, "0")}
                     </td>
                     <td className="py-3">
-                      <Link
-                        to={`/lojas/${encodeURIComponent(row.loja)}`}
-                        className="font-semibold text-ink hover:text-bordo transition-colors"
-                      >
-                        {row.loja}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/lojas/${encodeURIComponent(row.loja)}`}
+                          className="font-semibold text-ink hover:text-bordo transition-colors"
+                        >
+                          {row.loja}
+                        </Link>
+                        {isNew && <NewBadge />}
+                      </div>
                     </td>
                     <td className="py-3 px-3 text-right tabular-nums font-semibold font-mono">
                       {fmtMoney(Number(row.faturamento))}
@@ -414,4 +506,97 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="number-hero text-[22px] mt-1 text-ink">{value}</p>
     </div>
   );
+}
+
+function NewBadge() {
+  return (
+    <span
+      className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-[0.12em] bg-chartreuse text-bordo-deep"
+      title="Loja sem dados do mesmo mês no ano anterior — ainda sem comparação YoY"
+    >
+      nova
+    </span>
+  );
+}
+
+function SortHeader({
+  k,
+  cur,
+  dir,
+  onSort,
+  align = "left",
+  children,
+}: {
+  k: SortKey;
+  cur: SortKey;
+  dir: SortDir;
+  onSort: (k: SortKey) => void;
+  align?: "left" | "right";
+  children: React.ReactNode;
+}) {
+  const active = k === cur;
+  return (
+    <th
+      className={clsx(
+        "py-3 px-3 font-bold cursor-pointer select-none transition-colors",
+        align === "right" ? "text-right" : "text-left",
+        active ? "text-bordo" : "hover:text-ink",
+      )}
+      onClick={() => onSort(k)}
+    >
+      <span
+        className={clsx(
+          "inline-flex items-center gap-1",
+          align === "right" && "flex-row-reverse",
+        )}
+      >
+        {children}
+        {active ? (
+          dir === "asc" ? (
+            <ChevronUp size={11} strokeWidth={3} />
+          ) : (
+            <ChevronDown size={11} strokeWidth={3} />
+          )
+        ) : (
+          <ChevronDown
+            size={11}
+            strokeWidth={2}
+            className="opacity-25"
+          />
+        )}
+      </span>
+    </th>
+  );
+}
+
+function sortRows(
+  rows: Faturamento[],
+  key: SortKey,
+  dir: SortDir,
+): Faturamento[] {
+  const sign = dir === "asc" ? 1 : -1;
+  const sorted = [...rows].sort((a, b) => {
+    if (key === "loja") {
+      return sign * a.loja.localeCompare(b.loja);
+    }
+    const av = a[key];
+    const bv = b[key];
+    // nulls always last regardless of direction
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return sign * (Number(av) - Number(bv));
+  });
+  return sorted;
+}
+
+function fmtTimestamp(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(-2);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} · ${hh}:${mi}`;
 }
