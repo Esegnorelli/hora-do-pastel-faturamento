@@ -1,10 +1,5 @@
 import clsx from "clsx";
-import {
-  fmtInt,
-  fmtMoney,
-  fmtPercent,
-  monthName,
-} from "@/lib/format";
+import { fmtInt, fmtMoney, fmtPercent, monthName } from "@/lib/format";
 
 type Row = {
   mes: number;
@@ -37,16 +32,18 @@ export function StoreMonthlyTable({ rows }: { rows: Row[] }) {
           {rows.map((r) => (
             <tr
               key={r.mes}
-              className="border-t border-border hover:bg-stone-50/50"
+              className="border-t border-border hover:bg-white/[0.02]"
             >
-              <td className="py-2 pr-3 font-semibold">{monthName(r.mes)}</td>
-              <td className="text-right py-2 px-2 tabular-nums font-semibold">
+              <td className="py-2 pr-3 font-semibold text-foreground">
+                {monthName(r.mes)}
+              </td>
+              <td className="text-right py-2 px-2 tabular-nums font-semibold text-foreground">
                 {fmtMoney(r.faturamento)}
               </td>
-              <td className="text-right py-2 px-2 tabular-nums">
+              <td className="text-right py-2 px-2 tabular-nums text-muted-strong">
                 {fmtInt(r.pedidos)}
               </td>
-              <td className="text-right py-2 px-2 tabular-nums">
+              <td className="text-right py-2 px-2 tabular-nums text-muted-strong">
                 R$ {r.ticket_medio.toFixed(2)}
               </td>
               <td
@@ -55,8 +52,8 @@ export function StoreMonthlyTable({ rows }: { rows: Row[] }) {
                   r.mom_percent === null
                     ? "text-muted"
                     : r.mom_percent >= 0
-                      ? "text-emerald-700"
-                      : "text-red-700",
+                      ? "text-[#7fc46a]"
+                      : "text-[#ff5566]",
                 )}
               >
                 {r.mom_percent === null
@@ -69,8 +66,8 @@ export function StoreMonthlyTable({ rows }: { rows: Row[] }) {
                   r.yoy_percent === null
                     ? "text-muted"
                     : r.yoy_percent >= 0
-                      ? "text-emerald-700"
-                      : "text-red-700",
+                      ? "text-[#7fc46a]"
+                      : "text-[#ff5566]",
                 )}
               >
                 {r.yoy_percent === null
@@ -81,15 +78,15 @@ export function StoreMonthlyTable({ rows }: { rows: Row[] }) {
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-stone-300 bg-stone-50/60">
-            <td className="py-2 pr-3 font-bold">Total</td>
-            <td className="text-right py-2 px-2 tabular-nums font-bold">
+          <tr className="border-t-2 border-border-strong bg-white/[0.03]">
+            <td className="py-2 pr-3 font-bold text-foreground">Total</td>
+            <td className="text-right py-2 px-2 tabular-nums font-bold text-foreground">
               {fmtMoney(total)}
             </td>
-            <td className="text-right py-2 px-2 tabular-nums font-bold">
+            <td className="text-right py-2 px-2 tabular-nums font-bold text-foreground">
               {fmtInt(totalPedidos)}
             </td>
-            <td className="text-right py-2 px-2 tabular-nums font-bold">
+            <td className="text-right py-2 px-2 tabular-nums font-bold text-foreground">
               R$ {ticket.toFixed(2)}
             </td>
             <td className="text-right py-2 px-2 text-muted">—</td>

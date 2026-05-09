@@ -37,7 +37,7 @@ export function SalesFilters({
           value={loja || "todas"}
           onChange={(e) => update("loja", e.target.value)}
           disabled={pending}
-          className="h-10 min-w-[220px] rounded-xl border border-border bg-surface px-3 pr-8 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+          className="h-10 min-w-[220px] rounded-xl border border-border-strong bg-surface text-foreground px-3 pr-8 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
         >
           <option value="todas">Todas as lojas</option>
           {lojas.map((nome) => (
@@ -55,7 +55,7 @@ export function SalesFilters({
           value={ano}
           onChange={(e) => update("ano", e.target.value)}
           disabled={pending}
-          className="h-10 min-w-[130px] rounded-xl border border-border bg-surface px-3 pr-8 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+          className="h-10 min-w-[130px] rounded-xl border border-border-strong bg-surface text-foreground px-3 pr-8 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
         >
           {anos.map((a) => (
             <option key={a} value={a}>

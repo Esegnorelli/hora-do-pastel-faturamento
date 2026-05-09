@@ -33,22 +33,26 @@ export function NetworkBreathingChart({ points }: { points: Point[] }) {
         >
           <defs>
             <linearGradient id="netFat" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c1272d" stopOpacity={0.45} />
-              <stop offset="95%" stopColor="#c1272d" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#b00012" stopOpacity={0.6} />
+              <stop offset="95%" stopColor="#b00012" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" vertical={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.06)"
+            vertical={false}
+          />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#78716c" }}
+            tick={{ fontSize: 11, fill: "#8a8a99" }}
             tickLine={false}
-            axisLine={{ stroke: "#e7e5e4" }}
+            axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
             interval="preserveStartEnd"
             minTickGap={28}
           />
           <YAxis
             yAxisId="fat"
-            tick={{ fontSize: 11, fill: "#78716c" }}
+            tick={{ fontSize: 11, fill: "#8a8a99" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => fmtMoneyCompact(Number(v))}
@@ -57,7 +61,7 @@ export function NetworkBreathingChart({ points }: { points: Point[] }) {
           <YAxis
             yAxisId="lojas"
             orientation="right"
-            tick={{ fontSize: 11, fill: "#a8a29e" }}
+            tick={{ fontSize: 11, fill: "#ffb500" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `${v}`}
@@ -65,11 +69,17 @@ export function NetworkBreathingChart({ points }: { points: Point[] }) {
             domain={[0, "dataMax + 4"]}
           />
           <Tooltip
-            cursor={{ stroke: "#c1272d", strokeWidth: 1, strokeDasharray: 4 }}
+            cursor={{
+              stroke: "#b00012",
+              strokeWidth: 1,
+              strokeDasharray: 4,
+            }}
             contentStyle={{
+              background: "rgba(13,13,26,0.96)",
               borderRadius: 12,
-              border: "1px solid #e7e5e4",
+              border: "1px solid rgba(255,255,255,0.14)",
               fontSize: 12,
+              color: "#f5f5f7",
             }}
             formatter={(value, name) => {
               if (name === "Faturamento")
@@ -80,12 +90,15 @@ export function NetworkBreathingChart({ points }: { points: Point[] }) {
             }}
             labelFormatter={(l) => `Mês ${l}`}
           />
-          <Legend wrapperStyle={{ fontSize: 12, paddingTop: 4 }} iconType="circle" />
+          <Legend
+            wrapperStyle={{ fontSize: 12, paddingTop: 4, color: "#dfe0ee" }}
+            iconType="circle"
+          />
           <Bar
             yAxisId="lojas"
             dataKey="lojas_count"
             name="Lojas operando"
-            fill="rgba(193, 39, 45, 0.16)"
+            fill="rgba(255, 181, 0, 0.35)"
             radius={[3, 3, 0, 0]}
             barSize={10}
           />
@@ -94,11 +107,11 @@ export function NetworkBreathingChart({ points }: { points: Point[] }) {
             type="monotone"
             dataKey="faturamento"
             name="Faturamento"
-            stroke="#c1272d"
+            stroke="#b00012"
             strokeWidth={2.5}
             fill="url(#netFat)"
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
+            activeDot={{ r: 5, strokeWidth: 0, fill: "#ffb500" }}
           />
         </ComposedChart>
       </ResponsiveContainer>

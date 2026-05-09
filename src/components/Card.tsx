@@ -17,7 +17,7 @@ export function Card({
   return (
     <section
       className={clsx(
-        "rounded-2xl bg-surface border border-border shadow-sm",
+        "rounded-2xl bg-surface border border-border glow-card-static relative",
         className,
       )}
     >
@@ -25,7 +25,7 @@ export function Card({
         <header className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
           <div>
             {title && (
-              <h2 className="text-[15px] font-semibold tracking-tight">
+              <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
                 {title}
               </h2>
             )}

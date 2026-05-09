@@ -38,9 +38,9 @@ export function MatrixTable({
           {rows.map((r) => (
             <tr
               key={r.loja}
-              className="border-t border-border hover:bg-stone-50/50"
+              className="border-t border-border hover:bg-white/[0.02]"
             >
-              <td className="py-2 pr-3 font-semibold sticky left-0 bg-surface">
+              <td className="py-2 pr-3 font-semibold sticky left-0 bg-surface text-foreground">
                 {r.loja}
               </td>
               {months.map((m) => {
@@ -49,7 +49,7 @@ export function MatrixTable({
                   return (
                     <td
                       key={m}
-                      className="text-right py-2 px-2 text-stone-300 tabular-nums"
+                      className="text-right py-2 px-2 text-white/20 tabular-nums"
                     >
                       —
                     </td>
@@ -62,9 +62,9 @@ export function MatrixTable({
                 return (
                   <td
                     key={m}
-                    className="text-right py-2 px-2 tabular-nums"
+                    className="text-right py-2 px-2 tabular-nums text-foreground"
                     style={{
-                      backgroundColor: `rgba(193,39,45,${(intensity * 0.18).toFixed(3)})`,
+                      backgroundColor: `rgba(176, 0, 18, ${(intensity * 0.32).toFixed(3)})`,
                     }}
                     title={`${cell.pedidos} pedidos · ticket R$ ${cell.ticket_medio.toFixed(2)}`}
                   >
@@ -72,7 +72,7 @@ export function MatrixTable({
                   </td>
                 );
               })}
-              <td className="text-right py-2 pl-2 font-bold tabular-nums">
+              <td className="text-right py-2 pl-2 font-bold tabular-nums text-foreground">
                 {fmtMoneyCompact(r.total)}
               </td>
             </tr>

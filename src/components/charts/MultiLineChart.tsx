@@ -19,25 +19,25 @@ type Serie = {
 };
 
 const palette = [
-  "#c1272d",
-  "#f59e0b",
-  "#0ea5e9",
-  "#16a34a",
-  "#7c3aed",
+  "#b00012",
+  "#ffb500",
+  "#7fc46a",
+  "#ff7a8c",
+  "#a07cff",
+  "#ffc533",
+  "#ff5566",
+  "#4a7a3e",
   "#ec4899",
+  "#0ea5e9",
+  "#f97316",
   "#22c55e",
-  "#0891b2",
-  "#ea580c",
   "#6366f1",
   "#14b8a6",
-  "#a855f7",
-  "#f43f5e",
-  "#84cc16",
   "#eab308",
-  "#10b981",
+  "#7c3aed",
   "#3b82f6",
   "#d946ef",
-  "#f97316",
+  "#10b981",
   "#06b6d4",
 ];
 
@@ -90,14 +90,14 @@ export function MultiLineChart({ series }: { series: Serie[] }) {
               onClick={() => toggle(s.loja)}
               className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
                 on
-                  ? "text-white border-transparent"
-                  : "text-stone-500 border-border bg-stone-50 hover:bg-stone-100"
+                  ? "text-black border-transparent font-semibold"
+                  : "text-muted-strong border-border bg-white/[0.03] hover:bg-white/[0.06]"
               }`}
               style={on ? { backgroundColor: color } : undefined}
             >
               <span
                 className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle"
-                style={{ backgroundColor: on ? "white" : color }}
+                style={{ backgroundColor: on ? "rgba(0,0,0,0.4)" : color }}
               />
               {s.loja}
             </button>
@@ -110,15 +110,19 @@ export function MultiLineChart({ series }: { series: Serie[] }) {
             data={rows}
             margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" vertical={false} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.06)"
+              vertical={false}
+            />
             <XAxis
               dataKey="mesLabel"
-              tick={{ fontSize: 11, fill: "#78716c" }}
+              tick={{ fontSize: 11, fill: "#8a8a99" }}
               tickLine={false}
-              axisLine={{ stroke: "#e7e5e4" }}
+              axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#78716c" }}
+              tick={{ fontSize: 11, fill: "#8a8a99" }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => fmtMoneyCompact(Number(v))}
@@ -126,13 +130,15 @@ export function MultiLineChart({ series }: { series: Serie[] }) {
             />
             <Tooltip
               contentStyle={{
+                background: "rgba(13,13,26,0.96)",
                 borderRadius: 12,
-                border: "1px solid #e7e5e4",
+                border: "1px solid rgba(255,255,255,0.14)",
                 fontSize: 12,
+                color: "#f5f5f7",
               }}
               formatter={(value) => fmtMoney(Number(value))}
             />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 11, color: "#dfe0ee" }} />
             {sortedSeries.map((s, i) => (
               <Line
                 key={s.loja}

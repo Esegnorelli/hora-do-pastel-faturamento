@@ -19,7 +19,7 @@ export function Sparkline({
           y1={height / 2}
           x2={width}
           y2={height / 2}
-          stroke="#e7e5e4"
+          stroke="rgba(255,255,255,0.12)"
           strokeWidth={2}
         />
       </svg>
@@ -36,18 +36,15 @@ export function Sparkline({
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
-  const stroke =
-    positive === false
-      ? "#dc2626"
-      : positive === true
-        ? "#16a34a"
-        : "#78716c";
+
+  // Use brand red for the line; tint of fill follows trend (positive/negative)
+  const stroke = "#b00012";
   const fill =
     positive === false
-      ? "rgba(220,38,38,0.10)"
+      ? "rgba(176, 0, 18, 0.18)"
       : positive === true
-        ? "rgba(22,163,74,0.10)"
-        : "rgba(120,113,108,0.10)";
+        ? "rgba(176, 0, 18, 0.16)"
+        : "rgba(255, 255, 255, 0.05)";
   const last = values[values.length - 1];
   const lastX = (values.length - 1) * stepX;
   const lastY = height - ((last - min) / range) * (height - 4) - 2;
@@ -56,7 +53,13 @@ export function Sparkline({
 
   return (
     <svg width={width} height={height} aria-hidden="true">
-      <polyline points={areaPoints} fill={fill} stroke="none" />
+      <defs>
+        <linearGradient id="sparkfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#b00012" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#b00012" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polyline points={areaPoints} fill="url(#sparkfill)" stroke="none" />
       <polyline
         points={points}
         fill="none"
@@ -65,7 +68,7 @@ export function Sparkline({
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={lastX} cy={lastY} r={2.4} fill={stroke} />
+      <circle cx={lastX} cy={lastY} r={2.4} fill="#ffb500" />
     </svg>
   );
 }

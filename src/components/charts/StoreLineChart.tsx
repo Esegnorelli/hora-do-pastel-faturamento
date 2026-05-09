@@ -33,20 +33,24 @@ export function StoreLineChart({ rows }: { rows: Row[] }) {
         >
           <defs>
             <linearGradient id="storeBar" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c1272d" stopOpacity={0.85} />
-              <stop offset="100%" stopColor="#c1272d" stopOpacity={0.45} />
+              <stop offset="0%" stopColor="#b00012" stopOpacity={0.95} />
+              <stop offset="100%" stopColor="#700009" stopOpacity={0.65} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" vertical={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.06)"
+            vertical={false}
+          />
           <XAxis
             dataKey="mesLabel"
-            tick={{ fontSize: 11, fill: "#78716c" }}
+            tick={{ fontSize: 11, fill: "#8a8a99" }}
             tickLine={false}
-            axisLine={{ stroke: "#e7e5e4" }}
+            axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
           />
           <YAxis
             yAxisId="fat"
-            tick={{ fontSize: 11, fill: "#78716c" }}
+            tick={{ fontSize: 11, fill: "#8a8a99" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => fmtMoneyCompact(Number(v))}
@@ -55,7 +59,7 @@ export function StoreLineChart({ rows }: { rows: Row[] }) {
           <YAxis
             yAxisId="ticket"
             orientation="right"
-            tick={{ fontSize: 11, fill: "#78716c" }}
+            tick={{ fontSize: 11, fill: "#ffb500" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `R$${Number(v).toFixed(0)}`}
@@ -63,9 +67,11 @@ export function StoreLineChart({ rows }: { rows: Row[] }) {
           />
           <Tooltip
             contentStyle={{
+              background: "rgba(13,13,26,0.96)",
               borderRadius: 12,
-              border: "1px solid #e7e5e4",
+              border: "1px solid rgba(255,255,255,0.14)",
               fontSize: 12,
+              color: "#f5f5f7",
             }}
             formatter={(value, name) => {
               const v = Number(value);
@@ -88,9 +94,9 @@ export function StoreLineChart({ rows }: { rows: Row[] }) {
             yAxisId="ticket"
             type="monotone"
             dataKey="ticket_medio"
-            stroke="#0a0a0a"
-            strokeWidth={2}
-            dot={{ r: 3, fill: "#0a0a0a" }}
+            stroke="#ffb500"
+            strokeWidth={2.4}
+            dot={{ r: 3, fill: "#ffb500" }}
           />
         </ComposedChart>
       </ResponsiveContainer>

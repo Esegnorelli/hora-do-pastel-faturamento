@@ -37,7 +37,7 @@ export default async function VendasPage({
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted font-semibold">
             Vendas
           </p>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {lojaSelecionada ? loja : "Todas as lojas"} · {ano}
           </h1>
           <p className="text-sm text-muted mt-1">
@@ -46,12 +46,20 @@ export default async function VendasPage({
               : "Faturamento mês a mês de cada loja da rede."}
           </p>
         </div>
-        <SalesFilters
-          lojas={lojasNomes}
-          anos={anos.length ? anos : [ano]}
-          loja={loja}
-          ano={ano}
-        />
+        <div className="flex items-end gap-3 flex-wrap">
+          <span className="inline-flex items-center gap-2 rounded-full bg-brand/12 border border-brand/40 text-foreground px-3 py-1.5 text-xs font-bold tracking-wide uppercase self-center">
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand">
+              <span className="live-pulse" />
+            </span>
+            AO VIVO
+          </span>
+          <SalesFilters
+            lojas={lojasNomes}
+            anos={anos.length ? anos : [ano]}
+            loja={loja}
+            ano={ano}
+          />
+        </div>
       </div>
 
       {lojaSelecionada ? (
