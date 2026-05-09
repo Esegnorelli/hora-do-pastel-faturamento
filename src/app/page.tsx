@@ -1,65 +1,160 @@
-import Image from "next/image";
+import { KpiCard } from "@/components/KpiCard";
+import { Card } from "@/components/Card";
+import { RevenueAreaChart } from "@/components/charts/RevenueAreaChart";
+import { StoreRankingChart } from "@/components/charts/StoreRankingChart";
+import { TicketScatter } from "@/components/charts/TicketScatter";
+import {
+  getEvolucaoRede,
+  getFaturamentoMes,
+  getResumoMes,
+  getUltimaData,
+} from "@/lib/data";
+import {
+  fmtInt,
+  fmtMoney,
+  fullMonthYearLabel,
+} from "@/lib/format";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const ultimaData = await getUltimaData();
+  if (!ultimaData) {
+    return (
+      <div className="rounded-2xl bg-surface border border-border p-8 text-center">
+        <p className="text-muted">Sem dados de faturamento ainda.</p>
+      </div>
+    );
+  }
+
+  const [resumo, linhas, evolucao] = await Promise.all([
+    getResumoMes(ultimaData),
+    getFaturamentoMes(ultimaData),
+    getEvolucaoRede(24),
+  ]);
+
+  const top5 = [...linhas]
+    .sort((a, b) => Number(b.faturamento) - Number(a.faturamento))
+    .slice(0, 5);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted font-semibold">
+            Painel da rede
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Visão geral · {fullMonthYearLabel(ultimaData)}
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-sm text-muted mt-1">
+            Faturamento consolidado das lojas Hora do Pastel.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft text-brand px-3 py-1.5 text-xs font-semibold">
+          <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+          Dados ao vivo · Supabase
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          label="Faturamento"
+          value={fmtMoney(resumo.faturamento)}
+          trend={resumo.yoy_percent}
+          hint="vs. mesmo mês ano anterior"
+        />
+        <KpiCard
+          label="Pedidos"
+          value={fmtInt(resumo.pedidos)}
+          hint={`${fmtInt(resumo.lojas_ativas)} lojas reportando`}
+        />
+        <KpiCard
+          label="Ticket médio"
+          value={fmtMoney(resumo.ticket_medio)}
+          hint="rede consolidada"
+        />
+        <KpiCard
+          label="vs. mês anterior"
+          value={
+            resumo.mom_percent !== null
+              ? `${resumo.mom_percent >= 0 ? "+" : ""}${resumo.mom_percent.toFixed(1)}%`
+              : "—"
+          }
+          trend={resumo.mom_percent}
+          hint="MoM faturamento"
+        />
+      </div>
+
+      <Card
+        title="Evolução do faturamento da rede"
+        subtitle="Últimos 24 meses · soma de todas as lojas"
+      >
+        <RevenueAreaChart
+          points={evolucao.map((e) => ({
+            data: e.data,
+            faturamento: e.faturamento,
+            pedidos: e.pedidos,
+          }))}
+        />
+      </Card>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Card
+          title="Ranking de lojas"
+          subtitle={`Faturamento por loja em ${fullMonthYearLabel(ultimaData)}`}
+          className="xl:col-span-2"
+        >
+          <StoreRankingChart
+            items={linhas.map((l) => ({
+              loja: l.loja,
+              faturamento: Number(l.faturamento),
+              pedidos: l.pedidos,
+            }))}
+          />
+        </Card>
+
+        <Card title="Top 5 lojas" subtitle="Maiores faturamentos do mês">
+          <ol className="space-y-3">
+            {top5.map((row, i) => (
+              <li
+                key={row.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white font-bold text-sm">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{row.loja}</p>
+                    <p className="text-xs text-muted">
+                      {fmtInt(row.pedidos)} pedidos · ticket R${" "}
+                      {Number(row.ticket_medio).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <span className="font-bold tabular-nums">
+                  {fmtMoney(Number(row.faturamento))}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      </div>
+
+      <Card
+        title="Pedidos × Ticket médio"
+        subtitle="Cada bolha é uma loja · tamanho = faturamento total"
+      >
+        <TicketScatter
+          items={linhas.map((l) => ({
+            loja: l.loja,
+            pedidos: l.pedidos,
+            ticket_medio: Number(l.ticket_medio),
+            faturamento: Number(l.faturamento),
+          }))}
+        />
+      </Card>
     </div>
   );
 }

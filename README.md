@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hora do Pastel — Faturamento
 
-## Getting Started
+Dashboard de faturamento da rede **Hora do Pastel**: visão consolidada da rede e detalhamento mês a mês por loja.
 
-First, run the development server:
+## Páginas
+
+- **`/`** — Dashboard com KPIs do mês mais recente, evolução de 24 meses da rede, ranking de lojas e dispersão pedidos × ticket.
+- **`/vendas`** — Vendas mês a mês, filtrável por loja e ano:
+  - **Todas as lojas**: matriz heatmap loja × mês + gráfico multi-linha interativo.
+  - **Loja específica**: KPIs do ano, gráfico combinado faturamento/ticket e tabela com MoM/YoY.
+
+## Stack
+
+| Camada | Tecnologia |
+| --- | --- |
+| Frontend | Next.js 16 (App Router) + React 19 + TypeScript |
+| Estilo | Tailwind CSS v4 |
+| Gráficos | Recharts |
+| Dados | Supabase (PostgreSQL + RLS) |
+| Hospedagem | Vercel |
+
+## Como rodar localmente
 
 ```bash
+npm install
+cp .env.example .env.local   # preencha NEXT_PUBLIC_SUPABASE_URL e _PUBLISHABLE_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Schema usado no Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tabelas em `public`:
 
-## Learn More
+- **`lojas(id, nome, ativa)`** — cadastro de lojas.
+- **`faturamento(id, data, loja, faturamento, pedidos, ticket_medio, mom_percent, yoy_percent)`** — uma linha por loja por mês (`data` é o primeiro dia do mês).
 
-To learn more about Next.js, take a look at the following resources:
+Ambas com RLS habilitada e políticas `SELECT` públicas (somente leitura via _publishable key_).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estrutura de pastas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── layout.tsx           # shell, top nav
+│   ├── page.tsx             # / dashboard
+│   ├── vendas/page.tsx      # /vendas mês a mês
+│   └── globals.css
+├── components/
+│   ├── KpiCard.tsx
+│   ├── Card.tsx
+│   ├── TopNav.tsx
+│   ├── NavLink.tsx
+│   ├── SalesFilters.tsx
+│   ├── MatrixTable.tsx
+│   ├── StoreMonthlyTable.tsx
+│   └── charts/
+│       ├── RevenueAreaChart.tsx
+│       ├── StoreRankingChart.tsx
+│       ├── TicketScatter.tsx
+│       ├── MultiLineChart.tsx
+│       └── StoreLineChart.tsx
+└── lib/
+    ├── supabase.ts          # cliente
+    ├── data.ts              # queries
+    ├── format.ts            # pt-BR currency/date helpers
+    └── types.ts
+```
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O projeto está configurado para deploy direto no Vercel — sem `vercel.json`. Defina as duas env vars `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no painel do Vercel.
