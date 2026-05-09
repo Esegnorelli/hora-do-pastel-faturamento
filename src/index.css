@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand palette extracted from official logo */
+  --color-bordo: #810001;
+  --color-bordo-deep: #670007;
+  --color-bordo-soft: #a82020;
+  --color-bordo-tint: #f3e0e1;
+  --color-chartreuse: #dde022;
+  --color-chartreuse-deep: #b8bb1a;
+  --color-wood: #b78247;
+  --color-wood-deep: #8a5e2c;
+  --color-cream: #faf6ee;
+  --color-cream-2: #f3ece0;
+  --color-cream-3: #ece2cf;
+  --color-ink: #1a120c;
+  --color-ink-2: #3d3026;
+  --color-ink-3: #6b5b4d;
+  --color-ink-4: #9b8b7a;
+  --color-rule: #e0d4c0;
+  --color-rule-soft: #ecdfca;
+  --color-paper: #ffffff;
+  --color-positive: #2f6b1f;
+  --color-positive-bg: #d9e6cf;
+  --color-negative: #b00012;
+  --color-negative-bg: #f3d8da;
+  --color-warn: #d4881a;
+  --color-warn-bg: #f5e7c9;
+  /* Fonts */
+  --font-sans: "Mulish", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: "Mulish", Georgia, serif;
+}
+
+html,
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+}
+
+* {
+  border-color: var(--color-rule);
+}
+
+::selection {
+  background: var(--color-chartreuse);
+  color: var(--color-bordo-deep);
+}
+
+/* Custom scrollbar — thin, on-brand */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border: 2px solid var(--color-cream);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bordo);
+}
+
+/* Tabular numbers helper */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Editorial small caps */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* Hairline divider */
+.hairline {
+  height: 1px;
+  background: var(--color-rule);
+  border: 0;
+}
+
+/* Display heading: very tight tracking, blackest weight */
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--color-bordo-deep);
+}
+
+/* Number ticker — used for big metrics */
+.number-hero {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Editorial body — slightly larger, more readable */
+.prose-rich {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+
+/* Animated mascot tilt (used in loaders/empty states) */
+@keyframes mascot-tilt {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+.mascot-tilt {
+  animation: mascot-tilt 2.4s ease-in-out infinite;
+  transform-origin: 50% 80%;
+}
+
+/* Subtle paper-grain backdrop on page */
+.paper {
+  background-image:
+    radial-gradient(at 100% 0%, rgba(183, 130, 71, 0.08) 0, transparent 40%),
+    radial-gradient(at 0% 100%, rgba(129, 0, 1, 0.04) 0, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Recharts overrides */
+.recharts-default-tooltip {
+  background: var(--color-paper) !important;
+  border: 1px solid var(--color-rule) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 12px 28px rgba(26, 18, 12, 0.08) !important;
+  padding: 10px 12px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 12px !important;
+}
+.recharts-tooltip-label {
+  font-weight: 700 !important;
+  color: var(--color-ink) !important;
+  margin-bottom: 4px !important;
+}
+.recharts-cartesian-axis-tick-value {
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+}
+
+.row-hover:hover {
+  background: var(--color-cream-2);
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -2px;
+}

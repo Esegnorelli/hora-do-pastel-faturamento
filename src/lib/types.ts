@@ -1,12 +1,14 @@
 export type Faturamento = {
   id: number;
-  data: string;
+  data: string; // YYYY-MM-DD (always day 01)
   loja: string;
   faturamento: number;
   pedidos: number;
   ticket_medio: number;
   mom_percent: number | null;
   yoy_percent: number | null;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Loja = {
@@ -15,18 +17,4 @@ export type Loja = {
   ativa: boolean | null;
 };
 
-export type RedeMensal = {
-  data: string;
-  faturamento: number;
-  pedidos: number;
-  ticket_medio: number;
-  lojas_count: number;
-};
-
-export type LojaMensal = {
-  loja: string;
-  faturamento: number;
-  pedidos: number;
-  ticket_medio: number;
-  yoy_percent: number | null;
-};
+export type LojaSlug = string; // url-safe slug

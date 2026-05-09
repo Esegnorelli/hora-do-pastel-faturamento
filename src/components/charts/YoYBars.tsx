@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Bar,
   BarChart,
@@ -18,7 +16,7 @@ type Row = {
   anterior: number | null;
 };
 
-export function YoYComparisonChart({
+export function YoYBars({
   rows,
   anoAtual,
 }: {
@@ -31,46 +29,33 @@ export function YoYComparisonChart({
     [`${anoAtual}`]: r.atual,
   }));
   return (
-    <div className="h-[300px] w-full">
+    <div style={{ width: "100%", height: 260 }}>
       <ResponsiveContainer>
         <BarChart
           data={data}
-          margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
+          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
           barCategoryGap="22%"
         >
-          <defs>
-            <linearGradient id="yoyCur" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#b00012" />
-              <stop offset="100%" stopColor="#700009" />
-            </linearGradient>
-          </defs>
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke="#e0d4c0"
+            strokeDasharray="2 4"
             vertical={false}
           />
           <XAxis
             dataKey="mes"
-            tick={{ fontSize: 11, fill: "#8a8a99" }}
+            tick={{ fontSize: 11, fill: "#6b5b4d" }}
             tickLine={false}
-            axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+            axisLine={{ stroke: "#e0d4c0" }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#8a8a99" }}
+            tick={{ fontSize: 11, fill: "#6b5b4d" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => fmtMoneyCompact(Number(v))}
             width={70}
           />
           <Tooltip
-            cursor={{ fill: "rgba(176,0,18,0.06)" }}
-            contentStyle={{
-              background: "rgba(13,13,26,0.96)",
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.14)",
-              fontSize: 12,
-              color: "#f5f5f7",
-            }}
+            cursor={{ fill: "rgba(129,0,1,0.04)" }}
             formatter={(value, name) =>
               value == null
                 ? ["—", String(name)]
@@ -78,20 +63,20 @@ export function YoYComparisonChart({
             }
           />
           <Legend
-            wrapperStyle={{ fontSize: 12, paddingTop: 4, color: "#dfe0ee" }}
-            iconType="circle"
+            wrapperStyle={{ fontSize: 12, paddingTop: 4, color: "#3d3026" }}
+            iconType="square"
           />
           <Bar
             dataKey={`${anoAtual - 1}`}
-            fill="rgba(255,255,255,0.18)"
-            radius={[6, 6, 0, 0]}
-            maxBarSize={34}
+            fill="#ece2cf"
+            radius={[3, 3, 0, 0]}
+            maxBarSize={28}
           />
           <Bar
             dataKey={`${anoAtual}`}
-            fill="url(#yoyCur)"
-            radius={[6, 6, 0, 0]}
-            maxBarSize={34}
+            fill="#810001"
+            radius={[3, 3, 0, 0]}
+            maxBarSize={28}
           />
         </BarChart>
       </ResponsiveContainer>
