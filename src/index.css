@@ -10,15 +10,15 @@
   --color-chartreuse-deep: #b8bb1a;
   --color-wood: #b78247;
   --color-wood-deep: #8a5e2c;
-  --color-cream: #faf6ee;
-  --color-cream-2: #f3ece0;
-  --color-cream-3: #ece2cf;
+  --color-cream: #ffffff;
+  --color-cream-2: #f7f4ee;
+  --color-cream-3: #efeae0;
   --color-ink: #1a120c;
   --color-ink-2: #3d3026;
   --color-ink-3: #6b5b4d;
   --color-ink-4: #9b8b7a;
-  --color-rule: #e0d4c0;
-  --color-rule-soft: #ecdfca;
+  --color-rule: #e8e2d4;
+  --color-rule-soft: #f1ece1;
   --color-paper: #ffffff;
   --color-positive: #2f6b1f;
   --color-positive-bg: #d9e6cf;
@@ -128,12 +128,9 @@ body {
   transform-origin: 50% 80%;
 }
 
-/* Subtle paper-grain backdrop on page */
+/* Paper class kept neutral — fundo branco, sem gradiente */
 .paper {
-  background-image:
-    radial-gradient(at 100% 0%, rgba(183, 130, 71, 0.08) 0, transparent 40%),
-    radial-gradient(at 0% 100%, rgba(129, 0, 1, 0.04) 0, transparent 50%);
-  background-attachment: fixed;
+  background: var(--color-paper);
 }
 
 /* Recharts overrides */
